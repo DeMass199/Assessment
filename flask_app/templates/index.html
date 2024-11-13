@@ -7,6 +7,35 @@
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" /> 
     <link href="style.css" rel="stylesheet" /> <!-- Add this line to link the style.css file -->
     <title>Home</title>
+    <style>
+      .btn-lg {
+        padding: 10px 20px;
+        font-size: 20px;
+      }
+
+      .center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .btn-primary {
+        background-color: grey;
+        color: white;
+      }
+
+      .btn-secondary {
+        background-color: grey;
+        color: white;
+      }
+
+      .btn-primary:hover,
+      .btn-secondary:hover {
+        background-color: blue;
+        color: white;
+      }
+    </style>
   </head>
   <body>
     <div class="container text-center mt-5">
@@ -22,10 +51,10 @@
       <!-- button -->
       <div class="mt-4">
         <a href="/login">
-          <button class="btn btn-primary mx-2">Login</button>
+          <button class="btn btn-primary btn-lg mx-2">Login</button>
         </a>
         <a href="/signup">
-          <button class="btn btn-secondary mx-2">Sign Up</button> 
+          <button class="btn btn-secondary btn-lg mx-2">Sign Up</button> 
         </a>
       </div>
     </div>
