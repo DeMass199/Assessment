@@ -4,6 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login</title>
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      integrity="sha384-pzjw8f+ua6U8dCl6qlc4g1KS1+V4muyyLq6kA8f4f8+0B1j6q5f8K59kPxh6b8q"
+      crossorigin="anonymous"
+    />
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -61,13 +68,34 @@
   <body>
     <h1>Login</h1>
     <form action="/login" method="post">
-      <label for="username">Username</label>
-      <input type="text" name="username" id="username" required /><br />
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" name="username" id="username" required />
+      </div>
 
-      <label for="password">Password</label>
-      <input type="password" name="password" id="password" required /><br />
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" name="password" id="password" required />
+      </div>
 
-      <button type="submit">Login</button>
+      <button type="submit" class="btn btn-primary">Login</button>
     </form>
+
+    <!-- Bootstrap JS -->
+    <script
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"
+      integrity="sha384-4v8kheZ5wv+0ZbW8jv3m4+6z4/2+q3Fq6zq5t6Z9z2Q1z4qz6z4z4z4z4z4z4z"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+      integrity="sha384-pzjw8f+ua6U8dCl6qlc4g1KS1+V4muyyLq6kA8f4f8+0B1j6q5f8K59kPxh6b8q"
+      crossorigin="anonymous"
+    ></script>
   </body>
 </html>
