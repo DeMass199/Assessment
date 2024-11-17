@@ -9,7 +9,7 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 # insert users with hashed passwords
-user1 = User(username='john_doe',
+user1 = User(username='Lucas',
 password=generate_password_hash('password123'))
 user2 = User(username='jane_doe',
 password=generate_password_hash('mypassword'))
