@@ -68,22 +68,23 @@
     </style>
   </head>
   <body>
-    <form action="/login" method="post">
+    <!-- Login Form -->
+    <form action="/dashboard" method="post">
       <h1>Login</h1>
       <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" class="form-control" name="username" id="username" style="width: 300px;" required />
+          <label for="username">Username</label>
+          <input type="text" class="form-control" name="username" id="username" style="width: 300px;" required />
       </div>
-
+  
       <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" name="password" id="password" style="width: 300px;" required />
+          <label for="password">Password</label>
+          <input type="password" class="form-control" name="password" id="password" style="width: 300px;" required />
       </div>
-
-      
+  
       <button type="submit" class="btn btn-primary">Login</button>
-      <button class="btn btn-secondary btn-lg mx-2" onclick="window.location.href='/'">Home</button>
-    </form>
+  </form>
+    
+
 
     <!-- Bootstrap JS -->
     <script
