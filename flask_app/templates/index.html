@@ -3,58 +3,84 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-   <!-- Bootstrap CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" /> 
-    <link href="style.css" rel="stylesheet" /> <!-- Add this line to link the style.css file -->
+    <!-- Bootstrap CSS -->
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link href="style.css" rel="stylesheet" />
     <title>Home</title>
     <style>
       .btn-lg {
-        padding: 10px 20px;
-        font-size: 20px;
-      }
-
-      .center {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+        padding: 10px 30px;
+        font-size: 1.2rem;
+        border-radius: 30px;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
       }
 
       .btn-primary {
-        background-color: grey;
+        background-color: #6c757d;
         color: white;
       }
 
       .btn-secondary {
-        background-color: grey;
+        background-color: #6c757d;
         color: white;
       }
 
-      .btn-primary:hover,
-      .btn-secondary:hover {
-        background-color: blue;
+      .btn-primary:hover {
+        background-color: #0056b3;
         color: white;
+      }
+
+      .btn-secondary:hover {
+        background-color: #0056b3;
+        color: white;
+      }
+
+      body {
+        background: linear-gradient(135deg, #e0eafc, #cfdef3);
+        height: 100vh;
+        font-family: "Arial", sans-serif;
+      }
+
+      .container {
+        margin-top: 100px;
+      }
+
+      img {
+        max-width: 200px;
+        border-radius: 50%;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      h1 {
+        font-weight: bold;
+        color: #343a40;
+      }
+
+      .mt-4 a {
+        text-decoration: none;
       }
     </style>
   </head>
   <body>
-    <div class="container text-center mt-5">
+    <div class="container text-center">
       <h1>Welcome to this Flask Application</h1>
-      <!-- logo -->       
+      <!-- Logo -->
       <img
         src="static/Tas.png"
         alt="Logo"
         class="mb-4"
-        style="max-width: 150px;"
       />
-
-      <!-- button -->
+      <!-- Buttons -->
       <div class="mt-4">
         <a href="/login">
           <button class="btn btn-primary btn-lg mx-2">Login</button>
         </a>
         <a href="/signup">
-          <button class="btn btn-secondary btn-lg mx-2">Sign Up</button> 
+          <button class="btn btn-secondary btn-lg mx-2">Sign Up</button>
         </a>
       </div>
     </div>
