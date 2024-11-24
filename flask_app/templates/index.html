@@ -16,27 +16,15 @@
         font-size: 1.2rem;
         border-radius: 30px;
         font-weight: bold;
-        transition: background-color 0.3s ease;
-      }
-
-      .btn-primary {
         background-color: #6c757d;
         color: white;
+        transition: background-color 0.3s ease, transform 0.2s ease;
       }
 
-      .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-      }
-
-      .btn-primary:hover {
+      .btn-lg:hover {
         background-color: #0056b3;
         color: white;
-      }
-
-      .btn-secondary:hover {
-        background-color: #0056b3;
-        color: white;
+        transform: scale(1.05);
       }
 
       body {
@@ -77,10 +65,10 @@
       <!-- Buttons -->
       <div class="mt-4">
         <a href="/login">
-          <button class="btn btn-primary btn-lg mx-2">Login</button>
+          <button class="btn btn-lg mx-2">Login</button>
         </a>
         <a href="/signup">
-          <button class="btn btn-secondary btn-lg mx-2">Sign Up</button>
+          <button class="btn btn-lg mx-2">Sign Up</button>
         </a>
       </div>
     </div>
@@ -91,3 +79,4 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   </body>
 </html>
+
