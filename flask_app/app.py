@@ -1,15 +1,19 @@
 from flask import Flask, request, render_template, redirect, url_for
 import sqlite3
+from werkzeug.security import check_password_hash
 
 app = Flask(__name__)
 
 def validate_user(username, password):
     conn = sqlite3.connect('todo.db')
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     user = cursor.fetchone()
     conn.close()
-    return user is not None
+    if user:
+        stored_password_hash = user[2]  # Assuming the password is in the 3rd column (index 2)
+        return check_password_hash(stored_password_hash, password)
+    return False
 
 @app.route('/')
 def home():
