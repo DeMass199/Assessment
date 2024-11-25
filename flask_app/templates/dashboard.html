@@ -15,7 +15,7 @@
             margin-top: 50px;
         }
 
-        .bucket-item {
+        .todo-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -49,16 +49,16 @@
     <div class="container">
         <h1 class="text-center">Welcome to Your Todo List!</h1>
     
-        <!-- Bucket List Form -->
+        <!-- Todo List Form -->
         <form action="/dashboard" method="POST" class="mb-4">
             <div class="form-group">
-                <label for="todo list">Add a new goal to your list:</label>
+                <label for="todo_task">Add a new goal to your list:</label>
                 <input type="text" name="todo_task" id="todo_task" class="form-control" placeholder="Enter your goal" required>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Add Goal</button>
         </form>
     
-        <!-- Bucket List -->
+        <!-- Todo List -->
         <h3>Your Todo List</h3>
         {% for item in todo_list %}
         <div class="todo-item {% if item.done %}completed{% endif %}">
@@ -69,4 +69,3 @@
     </div>
 </body>
 </html>
-
