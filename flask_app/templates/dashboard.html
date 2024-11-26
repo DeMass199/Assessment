@@ -26,9 +26,19 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .completed {
-            text-decoration: line-through;
-            color: gray;
+        .todo-item.red {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .todo-item.yellow {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .todo-item.green {
+            background-color: #d4edda;
+            color: #155724;
         }
 
         .btn-delete {
@@ -49,23 +59,66 @@
     <div class="container">
         <h1 class="text-center">Welcome to Your Todo List!</h1>
     
-        <!-- Todo List Form -->
-        <form action="/dashboard" method="POST" class="mb-4">
-            <div class="form-group">
-                <label for="todo_task">Add a new goal to your list:</label>
-                <input type="text" name="todo_task" id="todo_task" class="form-control" placeholder="Enter your goal" required>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Add Goal</button>
-        </form>
-    
-        <!-- Todo List -->
-        <h3>Your Todo List</h3>
-        {% for item in todo_list %}
-        <div class="todo-item {% if item.done %}completed{% endif %}">
-            <span>{{ item.task }}</span>
-            <a href="/delete/dashboard/{{ item.id }}" class="btn-delete">Delete</a>
+    <!-- Todo List Form -->
+    <form action="/dashboard" method="POST" class="mb-4">
+        <div class="form-group">
+            <label for="todo_task">Add a new goal to your list:</label>
+            <input type="text" name="todo_task" id="todo_task" class="form-control" placeholder="Enter your goal" required>
         </div>
-        {% endfor %}
+        <div class="form-group">
+            <label for="due_date">Set a due date:</label>
+            <input type="date" name="due_date" id="due_date" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Add Goal</button>
+    </form>
+
+    <!-- Todo List -->
+    <h3>Your Todo List</h3>
+    {% for item in todo_list %}
+    <div class="todo-item {% if item.color %}{{ item.color }}{% endif %}" data-due-date="{{ item.due_date }}">
+        <span><strong>{{ item.task }}</strong> (Due: {{ item.due_date }})</span>
+        <a href="/delete/dashboard/{{ item.id }}" class="btn-delete">Delete</a>
     </div>
-</body>
+    {% endfor %}
+
+    <script>
+        // Function to set the color based on due date
+        document.addEventListener('DOMContentLoaded', function () {
+            const items = document.querySelectorAll('.todo-item');
+
+            items.forEach(function (item) {
+                const dueDateStr = item.getAttribute('data-due-date');
+                if (dueDateStr) {
+                    const today = new Date();
+                    const dueDate = new Date(dueDateStr);
+
+                    const timeDiff = (dueDate - today) / (1000 * 60 * 60 * 24); // Difference in days
+
+                    if (timeDiff < 0) {
+                        item.classList.add('overdue');
+                    } else if (timeDiff <= 7) {
+                        item.classList.add('due-soon');
+                    } else {
+                        item.classList.add('on-time');
+                    }
+                }
+            });
+        });
+    </script>
+
+    <style>
+        .overdue {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .due-soon {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .on-time {
+            background-color: #d4edda;
+            color: #155724;
+        }
+    </style>
+    </body>
 </html>

@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
-
+from datetime import datetime, date, time
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Needed for flash messages
@@ -16,20 +16,18 @@ def add_user_to_db(username, password):
         cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
         existing_user = cursor.fetchone()
         if existing_user:
-            return False  # Username is already taken
-
-        # Hash the password before storing it
-        password_hash = generate_password_hash(password)
-
-        # Insert the new user into the database
-        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, password_hash))
+            flash("Username already exists. Please choose a different username.")
+            return redirect(url_for('register'))
+        
+        # Hash the password and insert the new user
+        hashed_password = generate_password_hash(password, method='sha256')
+        cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
         conn.commit()
-        return True  # User added successfully
-
+        flash("User registered successfully!")
+        return redirect(url_for('login'))
     except sqlite3.Error as e:
-        print(f"Database error: {e}")
-        return False
-
+        flash(f"An error occurred: {e}")
+        return redirect(url_for('register'))
     finally:
         conn.close()
 
@@ -96,20 +94,41 @@ def signup():
 
 
 
+
+
 # Sample in-memory storage for demonstration
 todo_list = []
-
 
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     global todo_list
     if request.method == "POST":
-        # Get the input from the form
         task = request.form.get("todo_task")
-        if task:  # Ensure the input isn't empty
-            # Add the task to the list (or database in a real app)
-            todo_list.append({"id": len(todo_list) + 1, "task": task, "done": False})
-        return redirect(url_for("dashboard"))
+        due_date = request.form.get("due_date")
+        if task and due_date:
+            # Add task with an ID and due date
+            todo_list.append({
+                "id": len(todo_list) + 1,
+                "task": task,
+                "due_date": due_date,
+                "done": False,
+                "color": ""  # Optional, can calculate color here or in template
+            })
+        return render_template("dashboard.html", todo_list=todo_list)
+    
+    # Set the color for each task based on due date
+    for item in todo_list:
+        if item.get("due_date"):
+            today = datetime.date.today()
+            due_date = datetime.datetime.strptime(item["due_date"], "%Y-%m-%d").date()
+            days_left = (due_date - today).days
+            if days_left < 0:
+                item["color"] = "overdue"
+            elif days_left <= 7:
+                item["color"] = "due-soon"
+            else:
+                item["color"] = "on-time"
+
     return render_template("dashboard.html", todo_list=todo_list)
 
 
@@ -118,7 +137,7 @@ def delete_task(task_id):
     global todo_list
     # Remove the task with the matching ID
     todo_list = [item for item in todo_list if item["id"] != task_id]
-    return redirect(url_for("dashboard"))
+    return render_template("dashboard.html", todo_list=todo_list)
 
 
 if __name__ == "__main__":
