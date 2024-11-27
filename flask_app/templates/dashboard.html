@@ -53,50 +53,82 @@
         .btn-delete:hover {
             background: #c0392b;
         }
+
+        .time-box {
+            border: 2px solid #007bff;
+            padding: 10px;
+            display: inline-block;
+            border-radius: 5px;
+            background-color: #e9f5ff;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1 class="text-center">Welcome to Your Todo List!</h1>
+        
+        <!-- World Clock -->
+        <div id="world-clock" class="text-center mb-4">
+            <h2>Current Time (AEST)</h2>
+            <div class="time-box">
+                <p id="clock" style="font-size: 24px; font-weight: bold;"></p>
+            </div>
+        </div>
     
     <!-- Todo List Form -->
     <form action="/dashboard" method="POST" class="mb-4">
-        <div class="form-group">
-            <label for="todo_task">Add a new goal to your list:</label>
-            <input type="text" name="todo_task" id="todo_task" class="form-control" placeholder="Enter your goal" required>
-        </div>
-        <div class="form-group">
-            <label for="due_date">Set a due date:</label>
-            <input type="date" name="due_date" id="due_date" class="form-control" required>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="todo_task">Add a new goal to your list:</label>
+                <input type="text" name="todo_task" id="todo_task" class="form-control" placeholder="Enter your goal" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="due_date">Set a due date:</label>
+                <input type="date" name="due_date" id="due_date" class="form-control" required>
+            </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block">Add Goal</button>
     </form>
 
     <!-- Todo List -->
     <h3>Your Todo List</h3>
-    {% for item in todo_list %}
-    <div class="todo-item {% if item.color %}{{ item.color }}{% endif %}" data-due-date="{{ item.due_date }}">
-        <span><strong>{{ item.task }}</strong> (Due: {{ item.due_date }})</span>
-        <a href="/delete/dashboard/{{ item.id }}" class="btn-delete">Delete</a>
+    <div class="row">
+        {% if todo_list %}
+            {% for item in todo_list %}
+            <div class="col-md-4 mb-3">
+                <div class="todo-item {% if item.color %}{{ item.color }}{% endif %}" data-due-date="{{ item.due_date }}">
+                    <div class="d-flex flex-column">
+                        <span class="task-text"><strong>{{ item.task }}</strong></span>
+                        <small class="text-muted">Due: {{ item.due_date }}</small>
+                    </div>
+                    <a href="/delete/dashboard/{{ item.id }}" class="btn-delete" 
+                       onclick="return confirm('Are you sure you want to delete this task?')">Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p>No tasks yet. Add your first task above!</p>
+            </div>
+        {% endif %}
     </div>
-    {% endfor %}
 
     <script>
-        // Function to set the color based on due date
+        // Function to set the color based on due date and time
         document.addEventListener('DOMContentLoaded', function () {
             const items = document.querySelectorAll('.todo-item');
 
             items.forEach(function (item) {
                 const dueDateStr = item.getAttribute('data-due-date');
                 if (dueDateStr) {
-                    const today = new Date();
                     const dueDate = new Date(dueDateStr);
+                    const now = new Date();
 
-                    const timeDiff = (dueDate - today) / (1000 * 60 * 60 * 24); // Difference in days
+                    const timeDiff = dueDate - now; // Difference in milliseconds
 
                     if (timeDiff < 0) {
                         item.classList.add('overdue');
-                    } else if (timeDiff <= 7) {
+                    } else if (timeDiff <= 7 * 24 * 60 * 60 * 1000) { // Less than or equal to 7 days
                         item.classList.add('due-soon');
                     } else {
                         item.classList.add('on-time');
@@ -104,6 +136,25 @@
                 }
             });
         });
+    </script>
+
+    <!-- Add script for the world clock -->
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const options = {
+                timeZone: 'Australia/Sydney', // Set timezone to AEST
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric',
+            };
+            const timeString = now.toLocaleTimeString('en-US', options);
+            document.getElementById('clock').textContent = timeString;
+        }
+        // Update the clock every second
+        setInterval(updateClock, 1000);
+        // Initial call to display the time immediately
+        updateClock();
     </script>
 
     <style>
@@ -118,6 +169,30 @@
         .on-time {
             background-color: #d4edda;
             color: #155724;
+        }
+
+        .todo-item {
+            min-height: 80px;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .todo-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task-text {
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+        
+        .text-muted {
+            font-size: 0.9em;
         }
     </style>
     </body>

@@ -102,8 +102,17 @@
   </head>
   <body>
     <!-- Login Form -->
-    <form action="/dashboard" method="post">
+    <form method="POST" action="{{ url_for('login') }}">
       <h1>Login</h1>
+      
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+      
       <div class="form-group">
         <label for="username">Username</label>
         <input
@@ -131,7 +140,7 @@
       <button type="submit" class="btn btn-primary">Login</button>
 
       <div class="text-muted">
-        Don't have an account? <a href="/signup">Sign up here</a>
+        Don't have an account? <a href="{{ url_for('signup') }}">Sign up here</a>
       </div>
     </form>
 
