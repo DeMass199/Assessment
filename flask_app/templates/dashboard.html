@@ -72,6 +72,7 @@
                         <div class="task-content">
                             <h3>{{ todo.task }}</h3>
                             <p><i class="far fa-calendar-alt"></i> Due: {{ todo.due_date }}</p>
+                            <p><i class="fas fa-tag"></i> Category: {{ todo.category }}</p>
                         </div>
                         <div class="task-actions">
                             <a href="{{ url_for('delete_task', task_id=todo.id) }}" class="btn btn-danger btn-sm">
@@ -103,6 +104,10 @@
                 <div class="form-group">
                     <label for="due_date">Due Date</label>
                     <input type="date" id="due_date" name="due_date" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" name="category" required>
                 </div>
                 <button type="submit" class="btn btn-primary">Add Task</button>
             </form>

@@ -63,6 +63,7 @@ def init_db():
                 task TEXT NOT NULL,
                 due_date TEXT NOT NULL,
                 done BOOLEAN NOT NULL DEFAULT 0,
+                category TEXT DEFAULT 'General',
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
@@ -76,8 +77,31 @@ def init_db():
     finally:
         conn.close()
 
-# Initialize the database
+def migrate_db():
+    """Add new columns to existing tables"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Check if category column exists
+        cursor.execute("PRAGMA table_info(todos)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        # Add category column if it doesn't exist
+        if 'category' not in columns:
+            cursor.execute("ALTER TABLE todos ADD COLUMN category TEXT DEFAULT 'General'")
+            conn.commit()
+            logger.info("Added category column to todos table")
+        
+        conn.close()
+        return True
+    except sqlite3.Error as e:
+        logger.error(f"Database migration error: {e}")
+        return False
+
+# Initialize and migrate the database
 init_db()
+migrate_db()
 
 # Update validate_user function
 def validate_user(username, password):
@@ -167,8 +191,9 @@ def dashboard():
     if request.method == "POST":
         task = request.form.get("todo_task")
         due_date_str = request.form.get("due_date")
+        category = request.form.get("category")  # Get category from form
         
-        if task and due_date_str:
+        if task and due_date_str and category:
             try:
                 # Parse only the date
                 due_date = datetime.strptime(due_date_str, "%Y-%m-%d")
@@ -177,8 +202,8 @@ def dashboard():
                 conn = sqlite3.connect(DB_PATH)
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO todos (user_id, task, due_date) VALUES (?, ?, ?)",
-                    (session['user_id'], task, due_date_iso)
+                    "INSERT INTO todos (user_id, task, due_date, category) VALUES (?, ?, ?, ?)",
+                    (session['user_id'], task, due_date_iso, category)
                 )
                 conn.commit()
                 conn.close()
@@ -189,7 +214,7 @@ def dashboard():
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, task, due_date FROM todos WHERE user_id = ?", (session['user_id'],))
+    cursor.execute("SELECT id, task, due_date, category FROM todos WHERE user_id = ?", (session['user_id'],))
     todos = cursor.fetchall()
     conn.close()
     
@@ -210,6 +235,7 @@ def dashboard():
             "id": todo[0],
             "task": todo[1],
             "due_date": due_date.strftime("%Y-%m-%d"),
+            "category": todo[3],
             "color": color
         })
         
