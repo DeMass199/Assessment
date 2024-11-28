@@ -31,8 +31,8 @@ def add_user_to_db(username, password):
         # Hash password and insert user
         hashed_password = generate_password_hash(password)
         cursor.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?, ?)",
-            (username, hashed_password)
+            "INSERT INTO users (username, password) VALUES (?, ?)",  # Removed extra ? from VALUES
+            (username, hashed_password)  # Matches the two ? placeholders
         )
         conn.commit()
         conn.close()
