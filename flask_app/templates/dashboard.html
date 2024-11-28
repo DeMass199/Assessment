@@ -3,232 +3,110 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo List Dashboard</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background: #f9f9f9;
-            font-family: Arial, sans-serif;
-        }
-
-        .container {
-            margin-top: 50px;
-        }
-
-        .todo-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            margin: 10px 0;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        .todo-item.red {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        .todo-item.yellow {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .todo-item.green {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .btn-delete {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-
-        .btn-delete:hover {
-            background: #c0392b;
-        }
-
-        .time-box {
-            border: 2px solid #007bff;
-            padding: 10px;
-            display: inline-block;
-            border-radius: 5px;
-            background-color: #e9f5ff;
-        }
-    </style>
+    <title>Dashboard - TaskMaster Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
-<body>
-    <div class="container">
-        <h1 class="text-center">Welcome to Your Todo List!</h1>
-        
-        <!-- World Clock -->
-        <div id="world-clock" class="text-center mb-4">
-            <h2>Current Time (AEST)</h2>
-            <div class="time-box">
-                <p id="clock" style="font-size: 24px; font-weight: bold;"></p>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="logo">TaskMaster Pro</h2>
             </div>
-        </div>
-    
-    <!-- Todo List Form -->
-    <form action="/dashboard" method="POST" class="mb-4">
-        <div class="form-row">
-            <div class="form-group col-md-4">
-                <label for="todo_task">Add a todo to your list:</label>
-                <input type="text" name="todo_task" id="todo_task" class="form-control" placeholder="Enter your goal" required>
-            </div>
-            <div class="form-group col-md-4">
-                <label for="due_date">Set a due date:</label>
-                <input type="date" name="due_date" id="due_date" class="form-control" required>
-            </div>
-            <div class="form-group col-md-4">
-                <label for="category">Category:</label>
-                <select name="category" id="category" class="form-control" required>
-                    <option value="" disabled selected>Select a category</option>
-                    <option value="Work">Work</option>
-                    <option value="Meetings">Meetings</option>
-                    <option value="Lunches">Lunches</option>
-                    <option value="Family time">Family time</option>
-                </select>
-            </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Add to your todo's</button>
-    </form>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('dashboard') }}" class="nav-item active">
+                    <i class="fas fa-tasks"></i> Tasks
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fas fa-calendar"></i> Calendar
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
 
-    <!-- Todo List -->
-    <h3>Your Todo List</h3>
-    {% if todo_dict %}
-        <div class="row">
-            {% for category, items in todo_dict.items() %}
-                <div class="col-md-6 mb-4">
-                    <div class="category-box p-3">
-                        <h4 class="category-title">{{ category }}</h4>
-                        <div class="row">
-                            {% for item in items %}
-                            <div class="col-md-4 mb-3">
-                                <div class="todo-item {% if item.color %}{{ item.color }}{% endif %}" data-due-date="{{ item.due_date }}">
-                                    <div class="d-flex flex-column">
-                                        <span class="task-text"><strong>{{ item.task }}</strong></span>
-                                        <small class="text-muted">Due: {{ item.due_date }}</small>
-                                        <a href="/delete/dashboard/{{ item.id }}" class="btn-delete mt-2" 
-                                           onclick="return confirm('Are you sure you want to delete this task?')">Delete</a>
-                                    </div>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        </div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Welcome, {{ session['username'] }}!</h1>
+                <div class="header-actions">
+                    <button class="btn btn-primary" onclick="document.getElementById('addTaskModal').style.display='block'">
+                        <i class="fas fa-plus"></i> New Task
+                    </button>
+                </div>
+            </header>
+
+            <!-- Task Summary -->
+            <div class="task-summary">
+                <div class="summary-card">
+                    <i class="fas fa-clock text-warning"></i>
+                    <div class="summary-info">
+                        <h3>Pending</h3>
+                        <p>{{ todo_list|length }}</p>
                     </div>
                 </div>
-            {% endfor %}
+                <div class="summary-card">
+                    <i class="fas fa-exclamation-circle text-danger"></i>
+                    <div class="summary-info">
+                        <h3>Overdue</h3>
+                        <p>{{ todo_list|selectattr('color', 'equalto', 'red')|list|length }}</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <i class="fas fa-calendar-check text-success"></i>
+                    <div class="summary-info">
+                        <h3>Due Soon</h3>
+                        <p>{{ todo_list|selectattr('color', 'equalto', 'yellow')|list|length }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task List -->
+            <div class="task-list">
+                <h2>Your Tasks</h2>
+                {% if todo_list %}
+                    {% for todo in todo_list %}
+                    <div class="task-card status-{{ todo.color }}">
+                        <div class="task-content">
+                            <h3>{{ todo.task }}</h3>
+                            <p><i class="far fa-calendar-alt"></i> Due: {{ todo.due_date }}</p>
+                        </div>
+                        <div class="task-actions">
+                            <a href="{{ url_for('delete_task', task_id=todo.id) }}" class="btn btn-danger btn-sm">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-clipboard-list"></i>
+                        <p>No tasks yet. Add your first task to get started!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <!-- Add Task Modal -->
+    <div id="addTaskModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('addTaskModal').style.display='none'">&times;</span>
+            <h2>Add New Task</h2>
+            <form method="POST" class="task-form">
+                <div class="form-group">
+                    <label for="todo_task">Task Description</label>
+                    <input type="text" id="todo_task" name="todo_task" required>
+                </div>
+                <div class="form-group">
+                    <label for="due_date">Due Date</label>
+                    <input type="date" id="due_date" name="due_date" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </form>
         </div>
-    {% else %}
-        <div class="col-12 text-center">
-            <p>No tasks yet. Add your first task above!</p>
-        </div>
-    {% endif %}
-
-    <script>
-        // Function to set the color based on due date and time
-        document.addEventListener('DOMContentLoaded', function () {
-            const items = document.querySelectorAll('.todo-item');
-
-            items.forEach(function (item) {
-                const dueDateStr = item.getAttribute('data-due-date');
-                if (dueDateStr) {
-                    const dueDate = new Date(dueDateStr);
-                    const now = new Date();
-
-                    const timeDiff = dueDate - now; // Difference in milliseconds
-
-                    if (timeDiff < 0) {
-                        item.classList.add('overdue');
-                    } else if (timeDiff <= 7 * 24 * 60 * 60 * 1000) { // Less than or equal to 7 days
-                        item.classList.add('due-soon');
-                    } else {
-                        item.classList.add('on-time');
-                    }
-                }
-            });
-        });
-    </script>
-
-    <!-- Add script for the world clock -->
-    <script>
-        function updateClock() {
-            const now = new Date();
-            const options = {
-                timeZone: 'Australia/Sydney', // Set timezone to AEST
-                hour: 'numeric',
-                minute: 'numeric',
-                second: 'numeric',
-            };
-            const timeString = now.toLocaleTimeString('en-US', options);
-            document.getElementById('clock').textContent = timeString;
-        }
-        // Update the clock every second
-        setInterval(updateClock, 1000);
-        // Initial call to display the time immediately
-        updateClock();
-    </script>
-
-    <style>
-        .overdue {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-        .due-soon {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        .on-time {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .todo-item {
-            min-height: 80px;
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-        
-        .todo-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .task-text {
-            margin-bottom: 5px;
-            word-break: break-word;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        
-        .text-muted {
-            font-size: 0.9em;
-        }
-
-        .category-box {
-            background-color: #ffffff;
-            border: 1px solid #dddddd;
-            border-radius: 8px;
-            padding: 15px;
-        }
-
-        .category-title {
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #333;
-        }
-    </style>
-    </body>
+    </div>
+</body>
 </html>
