@@ -15,10 +15,10 @@
                 <h2 class="logo">TaskMaster Pro</h2>
             </div>
             <nav class="sidebar-nav">
-                <a href="{{ url_for('dashboard') }}" class="nav-item active">
+                <a href="{{ url_for('dashboard') }}" class="nav-item {% if active_page == 'tasks' %}active{% endif %}">
                     <i class="fas fa-tasks"></i> Tasks
                 </a>
-                <a href="#" class="nav-item">
+                <a href="{{ url_for('calendar_view') }}" class="nav-item {% if active_page == 'calendar' %}active{% endif %}">
                     <i class="fas fa-calendar"></i> Calendar
                 </a>
                 <a href="{{ url_for('logout') }}" class="nav-item">

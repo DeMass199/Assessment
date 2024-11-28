@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar - TaskMaster Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2 class="logo">TaskMaster Pro</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('dashboard') }}" class="nav-item">
+                    <i class="fas fa-tasks"></i> Tasks
+                </a>
+                <a href="{{ url_for('calendar_view') }}" class="nav-item active">
+                    <i class="fas fa-calendar"></i> Calendar
+                </a>
+                <a href="{{ url_for('logout') }}" class="nav-item">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="dashboard-header">
+                <h1>Calendar View</h1>
+                <div class="calendar-nav">
+                    <a href="?month={{ prev_month }}&year={{ prev_year }}" class="btn"><i class="fas fa-chevron-left"></i></a>
+                    <h2>{{ month_name }} {{ year }}</h2>
+                    <a href="?month={{ next_month }}&year={{ next_year }}" class="btn"><i class="fas fa-chevron-right"></i></a>
+                </div>
+            </header>
+
+            <div class="calendar">
+                <div class="calendar-header">
+                    <div>Sun</div>
+                    <div>Mon</div>
+                    <div>Tue</div>
+                    <div>Wed</div>
+                    <div>Thu</div>
+                    <div>Fri</div>
+                    <div>Sat</div>
+                </div>
+                <div class="calendar-grid">
+                    {% for week in calendar_data %}
+                        {% for day in week %}
+                            <div class="calendar-day {% if day.today %}today{% endif %}">
+                                <div class="day-number">{{ day.day }}</div>
+                                {% if day.tasks %}
+                                    {% for task in day.tasks %}
+                                    <div class="calendar-task status-{{ task.color }}">
+                                        {{ task.task }}
+                                    </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

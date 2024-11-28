@@ -4,6 +4,7 @@ import sqlite3
 from datetime import datetime, date, timedelta
 import os
 import logging
+import calendar
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG)
@@ -30,7 +31,7 @@ def add_user_to_db(username, password):
         # Hash password and insert user
         hashed_password = generate_password_hash(password)
         cursor.execute(
-            "INSERT INTO users (username, password) VALUES (?, ?)",
+            "INSERT INTO users (username, password) VALUES (?, ?, ?)",
             (username, hashed_password)
         )
         conn.commit()
@@ -257,6 +258,74 @@ def logout():
     session.clear()
     flash("You have been logged out!", "success")
     return redirect(url_for("login"))
+
+
+@app.route("/calendar")
+def calendar_view():
+    if 'user_id' not in session:
+        flash("Please login first!", "error")
+        return redirect(url_for("login"))
+
+    # Get current year and month from query parameters or use current date
+    year = int(request.args.get('year', datetime.now().year))
+    month = int(request.args.get('month', datetime.now().month))
+
+    # Calculate previous and next month/year
+    first_day = date(year, month, 1)
+    prev_month = (first_day - timedelta(days=1)).replace(day=1)
+    next_month = (first_day + timedelta(days=32)).replace(day=1)
+
+    # Get calendar data
+    cal = calendar.monthcalendar(year, month)
+    month_name = calendar.month_name[month]
+
+    # Get tasks for the current month
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT task, due_date FROM todos 
+        WHERE user_id = ? 
+        AND strftime('%Y-%m', due_date) = strftime('%Y-%m', ?)
+    """, (session['user_id'], f"{year}-{month:02d}-01"))
+    tasks = cursor.fetchall()
+    conn.close()
+
+    # Organize tasks by date
+    task_dict = {}
+    for task in tasks:
+        task_date = datetime.strptime(task[1], "%Y-%m-%d").date()
+        if task_date not in task_dict:
+            task_dict[task_date] = []
+        task_dict[task_date].append({
+            "task": task[0],
+            "color": "red" if task_date < date.today() else "yellow" if task_date <= date.today() + timedelta(days=7) else "on-time"
+        })
+
+    # Build calendar data
+    calendar_data = []
+    for week in cal:
+        week_data = []
+        for day in week:
+            if day == 0:
+                week_data.append({"day": "", "tasks": []})
+            else:
+                current_date = date(year, month, day)
+                week_data.append({
+                    "day": day,
+                    "today": current_date == date.today(),
+                    "tasks": task_dict.get(current_date, [])
+                })
+        calendar_data.append(week_data)
+
+    return render_template("calendar.html",
+                         calendar_data=calendar_data,
+                         month_name=month_name,
+                         year=year,
+                         prev_month=prev_month.month,
+                         prev_year=prev_month.year,
+                         next_month=next_month.month,
+                         next_year=next_month.year,
+                         active_page='calendar')
 
 
 if __name__ == "__main__":

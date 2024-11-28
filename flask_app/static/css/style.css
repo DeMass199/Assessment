@@ -328,6 +328,68 @@ footer {
     color: white;
 }
 
+.calendar {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #eee;
+}
+
+.calendar-day {
+    background: white;
+    min-height: 100px;
+    padding: 5px;
+    position: relative;
+}
+
+.calendar-day.today {
+    background: #f0f7ff;
+}
+
+.day-number {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.calendar-task {
+    font-size: 0.8em;
+    margin: 20px 2px 2px 2px;
+    padding: 3px 5px;
+    border-radius: 3px;
+    background: #f0f0f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-nav {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.calendar-nav h2 {
+    margin: 0;
+}
+
 @media (max-width: 768px) {
     .hero h1 {
         font-size: 2rem;
