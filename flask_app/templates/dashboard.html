@@ -78,40 +78,59 @@
     <!-- Todo List Form -->
     <form action="/dashboard" method="POST" class="mb-4">
         <div class="form-row">
-            <div class="form-group col-md-6">
-                <label for="todo_task">Add a new goal to your list:</label>
+            <div class="form-group col-md-4">
+                <label for="todo_task">Add a todo to your list:</label>
                 <input type="text" name="todo_task" id="todo_task" class="form-control" placeholder="Enter your goal" required>
             </div>
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-4">
                 <label for="due_date">Set a due date:</label>
                 <input type="date" name="due_date" id="due_date" class="form-control" required>
             </div>
+            <div class="form-group col-md-4">
+                <label for="category">Category:</label>
+                <select name="category" id="category" class="form-control" required>
+                    <option value="" disabled selected>Select a category</option>
+                    <option value="Work">Work</option>
+                    <option value="Meetings">Meetings</option>
+                    <option value="Lunches">Lunches</option>
+                    <option value="Family time">Family time</option>
+                </select>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary btn-block">Add Goal</button>
+        <button type="submit" class="btn btn-primary btn-block">Add to your todo's</button>
     </form>
 
     <!-- Todo List -->
     <h3>Your Todo List</h3>
-    <div class="row">
-        {% if todo_list %}
-            {% for item in todo_list %}
-            <div class="col-md-4 mb-3">
-                <div class="todo-item {% if item.color %}{{ item.color }}{% endif %}" data-due-date="{{ item.due_date }}">
-                    <div class="d-flex flex-column">
-                        <span class="task-text"><strong>{{ item.task }}</strong></span>
-                        <small class="text-muted">Due: {{ item.due_date }}</small>
+    {% if todo_dict %}
+        <div class="row">
+            {% for category, items in todo_dict.items() %}
+                <div class="col-md-6 mb-4">
+                    <div class="category-box p-3">
+                        <h4 class="category-title">{{ category }}</h4>
+                        <div class="row">
+                            {% for item in items %}
+                            <div class="col-md-4 mb-3">
+                                <div class="todo-item {% if item.color %}{{ item.color }}{% endif %}" data-due-date="{{ item.due_date }}">
+                                    <div class="d-flex flex-column">
+                                        <span class="task-text"><strong>{{ item.task }}</strong></span>
+                                        <small class="text-muted">Due: {{ item.due_date }}</small>
+                                        <a href="/delete/dashboard/{{ item.id }}" class="btn-delete mt-2" 
+                                           onclick="return confirm('Are you sure you want to delete this task?')">Delete</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
-                    <a href="/delete/dashboard/{{ item.id }}" class="btn-delete" 
-                       onclick="return confirm('Are you sure you want to delete this task?')">Delete</a>
                 </div>
-            </div>
             {% endfor %}
-        {% else %}
-            <div class="col-12 text-center">
-                <p>No tasks yet. Add your first task above!</p>
-            </div>
-        {% endif %}
-    </div>
+        </div>
+    {% else %}
+        <div class="col-12 text-center">
+            <p>No tasks yet. Add your first task above!</p>
+        </div>
+    {% endif %}
 
     <script>
         // Function to set the color based on due date and time
@@ -189,10 +208,26 @@
         .task-text {
             margin-bottom: 5px;
             word-break: break-word;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .text-muted {
             font-size: 0.9em;
+        }
+
+        .category-box {
+            background-color: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .category-title {
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #333;
         }
     </style>
     </body>

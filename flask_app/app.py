@@ -98,7 +98,22 @@ def validate_user(username, password):
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    stats = {
+        'total_users': 0,
+        'total_tasks': 0
+    }
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM users")
+        stats['total_users'] = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM todos")
+        stats['total_tasks'] = cursor.fetchone()[0]
+        conn.close()
+    except sqlite3.Error as e:
+        logger.error(f"Error fetching stats: {e}")
+    
+    return render_template("index.html", stats=stats)
 
 
 @app.route("/login", methods=["GET", "POST"])

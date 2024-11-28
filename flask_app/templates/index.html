@@ -1,82 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- Bootstrap CSS -->
-    <link
-      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link href="style.css" rel="stylesheet" />
-    <title>Home</title>
-    <style>
-      .btn-lg {
-        padding: 10px 30px;
-        font-size: 1.2rem;
-        border-radius: 30px;
-        font-weight: bold;
-        background-color: #6c757d;
-        color: white;
-        transition: background-color 0.3s ease, transform 0.2s ease;
-      }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskMaster Pro - Your Personal Task Manager</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <h1 class="logo">TaskMaster Pro</h1>
+            <div class="nav-links">
+                <a href="{{ url_for('login') }}" class="btn btn-outline">Login</a>
+                <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
+            </div>
+        </div>
+    </nav>
 
-      .btn-lg:hover {
-        background-color: #0056b3;
-        color: white;
-        transform: scale(1.05);
-      }
+    <header class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Manage Your Tasks with Ease</h1>
+                <p>Stay organized, meet deadlines, and boost your productivity with our powerful task management solution.</p>
+                <a href="{{ url_for('signup') }}" class="btn btn-large btn-primary">Get Started - It's Free!</a>
+            </div>
+        </div>
+    </header>
 
-      body {
-        background: linear-gradient(135deg, #e0eafc, #cfdef3);
-        height: 100vh;
-        font-family: "Arial", sans-serif;
-      }
+    <section class="features">
+        <div class="container">
+            <h2>Why Choose TaskMaster Pro?</h2>
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">📅</div>
+                    <h3>Smart Scheduling</h3>
+                    <p>Easily organize tasks with our intuitive date management system.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Priority Focus</h3>
+                    <p>Visual indicators help you focus on what matters most.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Progress Tracking</h3>
+                    <p>Monitor your productivity with clear visual feedback.</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-      .container {
-        margin-top: 100px;
-      }
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>{{ stats.total_users }}</h3>
+                    <p>Active Users</p>
+                </div>
+                <div class="stat-card">
+                    <h3>{{ stats.total_tasks }}</h3>
+                    <p>Tasks Managed</p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-      img {
-        max-width: 200px;
-        border-radius: 50%;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
-
-      h1 {
-        font-weight: bold;
-        color: #343a40;
-      }
-
-      .mt-4 a {
-        text-decoration: none;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container text-center">
-      <h1>Welcome to this Flask Application</h1>
-      <!-- Logo -->
-      <img
-        src="static/Tas.png"
-        alt="Logo"
-        class="mb-4"
-      />
-      <!-- Buttons -->
-      <div class="mt-4">
-        <a href="/login">
-          <button class="btn btn-lg mx-2">Login</button>
-        </a>
-        <a href="/signup">
-          <button class="btn btn-lg mx-2">Sign Up</button>
-        </a>
-      </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </body>
+    <footer>
+        <div class="container">
+            <p>&copy; 2024 TaskMaster Pro. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
 </html>
 
