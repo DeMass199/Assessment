@@ -68,6 +68,7 @@ def init_db():
                 done BOOLEAN NOT NULL DEFAULT 0,
                 category TEXT DEFAULT 'General',
                 notes TEXT DEFAULT '',
+                importance TEXT DEFAULT 'medium',
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
@@ -114,6 +115,15 @@ def migrate_db():
             cursor.execute("ALTER TABLE todos ADD COLUMN notes TEXT DEFAULT ''")
             conn.commit()
             logger.info("Added notes column to todos table")
+        
+        # Check if importance column exists
+        cursor.execute("PRAGMA table_info(todos)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'importance' not in columns:
+            cursor.execute("ALTER TABLE todos ADD COLUMN importance TEXT DEFAULT 'medium'")
+            conn.commit()
+            logger.info("Added importance column to todos table")
             
         conn.commit()
         conn.close()
@@ -229,6 +239,7 @@ def dashboard():
         due_date_str = request.form.get("due_date")
         category = request.form.get("category")  # Get category from form
         notes = request.form.get("notes", "")  # Get notes from form
+        importance = request.form.get("importance", "medium")
         
         if task and due_date_str and category:
             try:
@@ -239,8 +250,8 @@ def dashboard():
                 conn = sqlite3.connect(DB_PATH)
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO todos (user_id, task, due_date, category, notes) VALUES (?, ?, ?, ?, ?)",
-                    (session['user_id'], task, due_date_iso, category, notes)
+                    "INSERT INTO todos (user_id, task, due_date, category, notes, importance) VALUES (?, ?, ?, ?, ?, ?)",
+                    (session['user_id'], task, due_date_iso, category, notes, importance)
                 )
                 conn.commit()
                 conn.close()
@@ -252,7 +263,7 @@ def dashboard():
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, task, due_date, category, notes 
+        SELECT id, task, due_date, category, notes, importance 
         FROM todos 
         WHERE user_id = ? 
         ORDER BY date(due_date) ASC
@@ -284,6 +295,7 @@ def dashboard():
             "due_date": due_date.strftime("%Y-%m-%d"),
             "category": todo[3],
             "notes": todo[4],
+            "importance": todo[5],
             "color": color,
             "due_text": due_text
         })

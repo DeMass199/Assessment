@@ -56,10 +56,12 @@
                                 {% if day.tasks %}
                                     {% for task in day.tasks %}
                                     <div class="calendar-task {{ task.color }}" 
-                                         onclick="showTaskDetails('{{ task.task|e }}', '{{ task.due_date }}', '{{ task.category }}', '{{ task.notes|e }}')"
+                                         onclick="showTaskDetails('{{ task.task|e }}', '{{ task.due_date }}', '{{ task.category }}', '{{ task.notes|e }}', '{{ task.importance }}')"
                                          style="cursor: pointer;">
-                                        {{ task.task }}
-                                        <span class="due-text">{{ task.due_text }}</span>
+                                        <div class="task-info">
+                                            {{ task.task }}
+                                            <span class="importance-indicator {{ task.importance }}"></span>
+                                        </div>
                                         {% if task.notes %}
                                             <i class="fas fa-sticky-note" style="font-size: 0.8em; margin-left: 4px;"></i>
                                         {% endif %}
@@ -86,14 +88,17 @@
 
     <!-- Add this JavaScript at the end of your template -->
     <script>
-    function showTaskDetails(task, dueDate, category, notes) {
+    function showTaskDetails(task, dueDate, category, notes, importance) {
         const modal = document.getElementById('taskModal');
         const details = document.getElementById('taskDetails');
         
         details.innerHTML = `
             <h3>${task}</h3>
-            <p><i class="far fa-calendar-alt"></i> Due: ${dueDate}</p>
-            <p><i class="fas fa-tag"></i> Category: ${category}</p>
+            <div class="task-meta">
+                <p><i class="far fa-calendar-alt"></i> Due: ${dueDate}</p>
+                <p><i class="fas fa-tag"></i> Category: ${category}</p>
+                <p><i class="fas fa-exclamation-circle"></i> Priority: ${importance}</p>
+            </div>
             ${notes ? `
             <div class="task-notes">
                 <h4><i class="fas fa-sticky-note"></i> Notes</h4>
@@ -210,6 +215,41 @@
         font-size: 0.75em;
         margin-left: 8px;
         font-weight: bold;
+    }
+
+    .task-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .importance-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+
+    .importance-indicator.low {
+        background-color: #6c757d;
+    }
+
+    .importance-indicator.medium {
+        background-color: #0dcaf0;
+    }
+
+    .importance-indicator.high {
+        background-color: #ffc107;
+    }
+
+    .importance-indicator.urgent {
+        background-color: #dc3545;
+    }
+
+    .task-meta {
+        margin: 1rem 0;
+        display: grid;
+        gap: 0.5rem;
     }
     </style>
 </body>
