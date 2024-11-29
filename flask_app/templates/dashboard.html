@@ -80,6 +80,25 @@
                 .btn i {
                     font-size: 1rem;
                 }
+
+                .task-notes {
+                    margin-top: 0.5rem;
+                    font-size: 0.9em;
+                    color: #666;
+                    padding: 0.5rem;
+                    background-color: #f9f9f9;
+                    border-radius: 4px;
+                }
+                
+                .task-notes i {
+                    margin-right: 0.5rem;
+                    color: #888;
+                }
+                
+                textarea.form-control {
+                    resize: vertical;
+                    min-height: 60px;
+                }
             </style>
 
             <!-- Task Summary -->
@@ -117,6 +136,12 @@
                             <h3>{{ todo.task }}</h3>
                             <p><i class="far fa-calendar-alt"></i> Due: {{ todo.due_date }}</p>
                             <p><i class="fas fa-tag"></i> Category: {{ todo.category }}</p>
+                            {% if todo.notes %}
+                            <div class="task-notes">
+                                <i class="fas fa-sticky-note"></i>
+                                <span>{{ todo.notes }}</span>
+                            </div>
+                            {% endif %}
                         </div>
                         <div class="task-actions">
                             <a href="{{ url_for('delete_task', task_id=todo.id) }}" class="btn btn-danger btn-sm">
@@ -158,6 +183,11 @@
                         <option value="Assessment">Assessment</option>
                         <option value="Main project">Main project</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label for="notes">Notes:</label>
+                    <textarea name="notes" id="notes" class="form-control" rows="3" 
+                              placeholder="Add any additional notes..."></textarea>
                 </div>
                 <button type="submit" class="btn btn-primary">Add Task</button>
             </form>

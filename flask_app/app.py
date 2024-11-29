@@ -67,6 +67,7 @@ def init_db():
                 due_date TEXT NOT NULL,
                 done BOOLEAN NOT NULL DEFAULT 0,
                 category TEXT DEFAULT 'General',
+                notes TEXT DEFAULT '',
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
@@ -104,6 +105,15 @@ def migrate_db():
             cursor.execute("ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'light'")
         if 'notification_preference' not in columns:
             cursor.execute("ALTER TABLE users ADD COLUMN notification_preference TEXT DEFAULT 'email'")
+            
+        # Check if notes column exists
+        cursor.execute("PRAGMA table_info(todos)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'notes' not in columns:
+            cursor.execute("ALTER TABLE todos ADD COLUMN notes TEXT DEFAULT ''")
+            conn.commit()
+            logger.info("Added notes column to todos table")
             
         conn.commit()
         conn.close()
@@ -205,6 +215,7 @@ def dashboard():
         task = request.form.get("todo_task")
         due_date_str = request.form.get("due_date")
         category = request.form.get("category")  # Get category from form
+        notes = request.form.get("notes", "")  # Get notes from form
         
         if task and due_date_str and category:
             try:
@@ -215,8 +226,8 @@ def dashboard():
                 conn = sqlite3.connect(DB_PATH)
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO todos (user_id, task, due_date, category) VALUES (?, ?, ?, ?)",
-                    (session['user_id'], task, due_date_iso, category)
+                    "INSERT INTO todos (user_id, task, due_date, category, notes) VALUES (?, ?, ?, ?, ?)",
+                    (session['user_id'], task, due_date_iso, category, notes)
                 )
                 conn.commit()
                 conn.close()
@@ -227,7 +238,12 @@ def dashboard():
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("SELECT id, task, due_date, category FROM todos WHERE user_id = ?", (session['user_id'],))
+    cursor.execute("""
+        SELECT id, task, due_date, category, notes 
+        FROM todos 
+        WHERE user_id = ? 
+        ORDER BY date(due_date) ASC
+    """, (session['user_id'],))
     todos = cursor.fetchall()
     conn.close()
     
@@ -249,6 +265,7 @@ def dashboard():
             "task": todo[1],
             "due_date": due_date.strftime("%Y-%m-%d"),
             "category": todo[3],
+            "notes": todo[4],  # Add notes to the todo item
             "color": color
         })
         
