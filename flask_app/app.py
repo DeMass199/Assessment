@@ -69,6 +69,7 @@ def init_db():
                 category TEXT DEFAULT 'General',
                 notes TEXT DEFAULT '',
                 importance TEXT DEFAULT 'medium',
+                progress INTEGER DEFAULT 0,  # Added progress column
                 FOREIGN KEY (user_id) REFERENCES users (id)
             )
         """)
@@ -124,6 +125,15 @@ def migrate_db():
             cursor.execute("ALTER TABLE todos ADD COLUMN importance TEXT DEFAULT 'medium'")
             conn.commit()
             logger.info("Added importance column to todos table")
+        
+        # Check if progress column exists
+        cursor.execute("PRAGMA table_info(todos)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'progress' not in columns:
+            cursor.execute("ALTER TABLE todos ADD COLUMN progress INTEGER DEFAULT 0")
+            conn.commit()
+            logger.info("Added progress column to todos table")
             
         conn.commit()
         conn.close()
@@ -229,7 +239,8 @@ def colour(days_left):
         return "on-time"  # On time
 
 @app.route("/dashboard", methods=["GET", "POST"])
-def dashboard():
+@app.route("/dashboard/<show_completed>")
+def dashboard(show_completed=None):
     if 'user_id' not in session:
         flash("Please login first!", "error")
         return redirect(url_for("login"))
@@ -240,6 +251,7 @@ def dashboard():
         category = request.form.get("category")  # Get category from form
         notes = request.form.get("notes", "")  # Get notes from form
         importance = request.form.get("importance", "medium")
+        progress = int(request.form.get("progress", 0))  # Get progress from form
         
         if task and due_date_str and category:
             try:
@@ -250,8 +262,8 @@ def dashboard():
                 conn = sqlite3.connect(DB_PATH)
                 cursor = conn.cursor()
                 cursor.execute(
-                    "INSERT INTO todos (user_id, task, due_date, category, notes, importance) VALUES (?, ?, ?, ?, ?, ?)",
-                    (session['user_id'], task, due_date_iso, category, notes, importance)
+                    "INSERT INTO todos (user_id, task, due_date, category, notes, importance, progress) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (session['user_id'], task, due_date_iso, category, notes, importance, progress)
                 )
                 conn.commit()
                 conn.close()
@@ -262,12 +274,23 @@ def dashboard():
     
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT id, task, due_date, category, notes, importance 
-        FROM todos 
-        WHERE user_id = ? 
-        ORDER BY date(due_date) ASC
-    """, (session['user_id'],))
+    
+    # Modify the query based on show_completed parameter
+    if show_completed:
+        cursor.execute("""
+            SELECT id, task, due_date, category, notes, importance, progress, done 
+            FROM todos 
+            WHERE user_id = ? 
+            ORDER BY done ASC, date(due_date) ASC
+        """, (session['user_id'],))
+    else:
+        cursor.execute("""
+            SELECT id, task, due_date, category, notes, importance, progress, done 
+            FROM todos 
+            WHERE user_id = ? AND done = 0 
+            ORDER BY date(due_date) ASC
+        """, (session['user_id'],))
+    
     todos = cursor.fetchall()
     conn.close()
     
@@ -296,12 +319,95 @@ def dashboard():
             "category": todo[3],
             "notes": todo[4],
             "importance": todo[5],
+            "progress": todo[6],  # Added progress
             "color": color,
-            "due_text": due_text
+            "due_text": due_text,
+            "done": todo[7],  # Add the done status
         })
         
-    return render_template("dashboard.html", todo_list=todo_list)
+    return render_template("dashboard.html", 
+                         todo_list=todo_list, 
+                         show_completed=bool(show_completed))
 
+# Add route to update progress
+@app.route("/update_progress/<int:task_id>", methods=["POST"])
+def update_progress(task_id):
+    if 'user_id' not in session:
+        return "Unauthorized", 401
+    
+    new_progress = request.form.get("progress")
+    if new_progress is None:
+        return "Bad Request", 400
+    try:
+        new_progress = int(new_progress)
+        if not 0 <= new_progress <= 100:
+            raise ValueError
+    except ValueError:
+        return "Invalid progress value", 400
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE todos 
+            SET progress = ? 
+            WHERE id = ? AND user_id = ?
+        """, (new_progress, task_id, session['user_id']))
+        conn.commit()
+        conn.close()
+        return "Success", 200
+    except sqlite3.Error as e:
+        logger.error(f"Database error: {e}")
+        return "Internal Server Error", 500
+
+@app.route("/complete/task/<int:task_id>", methods=["POST"])
+def complete_task(task_id):
+    if 'user_id' not in session:
+        return "Unauthorized", 401
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE todos 
+            SET done = 1 
+            WHERE id = ? AND user_id = ?
+        """, (task_id, session['user_id']))
+        conn.commit()
+        conn.close()
+        return "Success", 200
+    except sqlite3.Error as e:
+        logger.error(f"Database error: {e}")
+        return "Internal Server Error", 500
+
+@app.route("/toggle/task/<int:task_id>", methods=["POST"])
+def toggle_task(task_id):
+    if 'user_id' not in session:
+        return "Unauthorized", 401
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        # First get current state
+        cursor.execute("SELECT done FROM todos WHERE id = ? AND user_id = ?", (task_id, session['user_id']))
+        current_state = cursor.fetchone()
+        
+        if current_state is None:
+            return "Task not found", 404
+            
+        # Toggle the state
+        new_state = 0 if current_state[0] else 1
+        cursor.execute("""
+            UPDATE todos 
+            SET done = ? 
+            WHERE id = ? AND user_id = ?
+        """, (new_state, task_id, session['user_id']))
+        conn.commit()
+        conn.close()
+        return "Success", 200
+    except sqlite3.Error as e:
+        logger.error(f"Database error: {e}")
+        return "Internal Server Error", 500
 
 @app.route("/delete/dashboard/<int:task_id>")
 def delete_task(task_id):

@@ -33,7 +33,10 @@
         <!-- Main Content -->
         <main class="main-content">
             <header class="dashboard-header">
-                <h1>Welcome, {{ session['username'] }}!</h1>
+                <div>
+                    <h1>Welcome, {{ session['username'] }}!</h1>
+                    <p class="text-muted">Here's your task overview</p>
+                </div>
                 <div class="header-actions">
                     <button class="btn btn-primary" onclick="document.getElementById('addTaskModal').style.display='block'">
                         <i class="fas fa-plus"></i> New Task
@@ -236,6 +239,20 @@
                 .task-card:has(.importance-badge.low) {
                     border-top-color: #6c757d;
                 }
+
+                .task-progress {
+                    margin-top: 1rem;
+                }
+                
+                .task-progress label {
+                    display: block;
+                    margin-bottom: 0.5rem;
+                    font-weight: bold;
+                }
+                
+                .task-progress input[type="range"] {
+                    width: 100%;
+                }
             </style>
 
             <!-- Task Summary -->
@@ -263,12 +280,20 @@
                 </div>
             </div>
 
+            <!-- Replace the existing toggle button with this -->
+            <div class="dashboard-actions">
+                <button class="btn btn-outline-secondary toggle-completed-btn">
+                    <i class="fas fa-eye"></i>
+                    <span class="toggle-text">Show Completed Tasks</span>
+                </button>
+            </div>
+
             <!-- Task List -->
             <div class="task-list">
                 <h2>Your Tasks</h2>
                 {% if todo_list %}
                     {% for todo in todo_list %}
-                    <div class="task-card status-{{ todo.color }}">
+                    <div class="task-card status-{{ todo.color }} {% if todo.done %}task-completed{% endif %}">
                         <div class="task-content">
                             <div class="task-priority">
                                 <span class="importance-badge {{ todo.importance }}">
@@ -287,8 +312,19 @@
                                 <span>{{ todo.notes }}</span>
                             </div>
                             {% endif %}
+                            
+                            <!-- Progress Bar -->
+                            <div class="progress-bar">
+                                <input type="range" min="0" max="100" value="{{ todo.progress }}" 
+                                       class="progress-slider" data-task-id="{{ todo.id }}">
+                                <span class="progress-value">{{ todo.progress }}%</span>
+                            </div>
                         </div>
                         <div class="task-actions">
+                            <button class="btn btn-sm toggle-complete-btn {% if todo.done %}btn-success active{% else %}btn-outline-success{% endif %}" 
+                                    data-task-id="{{ todo.id }}">
+                                <i class="fas {% if todo.done %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                            </button>
                             <a href="{{ url_for('delete_task', task_id=todo.id) }}" class="btn btn-danger btn-sm">
                                 <i class="fas fa-trash"></i>
                             </a>
@@ -347,5 +383,225 @@
             </form>
         </div>
     </div>
+
+    <!-- Add this JavaScript at the end of your template -->
+    <script>
+    function updateProgress(taskId, newProgress) {
+        fetch(`/update_progress/${taskId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `progress=${newProgress}`
+        })
+        .then(response => {
+            if (response.status === 200) {
+                // Optionally, display a success message or update the UI
+                console.log('Progress updated successfully.');
+            } else {
+                // Handle errors
+                alert('Failed to update progress.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while updating progress.');
+        });
+    }
+
+    document.querySelectorAll('.progress-slider').forEach(slider => {
+        slider.addEventListener('change', function() {
+            const taskId = this.dataset.taskId;
+            const newProgress = this.value;
+            const valueDisplay = this.nextElementSibling;
+            
+            // Update display immediately
+            valueDisplay.textContent = newProgress + '%';
+            
+            // Send update to server
+            fetch(`/update_progress/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `progress=${newProgress}`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update progress');
+            });
+        });
+    });
+
+    document.querySelectorAll('.progress-slider').forEach(slider => {
+        // Set initial progress
+        slider.style.setProperty('--progress', slider.value + '%');
+        
+        slider.addEventListener('input', function() {
+            const newProgress = this.value;
+            const valueDisplay = this.nextElementSibling;
+            
+            // Update progress bar fill and text
+            this.style.setProperty('--progress', newProgress + '%');
+            valueDisplay.textContent = newProgress + '%';
+        });
+        
+        slider.addEventListener('change', function() {
+            const taskId = this.dataset.taskId;
+            const newProgress = this.value;
+            
+            // Send update to server
+            fetch(`/update_progress/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `progress=${newProgress}`
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to update progress');
+            });
+        });
+    });
+
+    document.querySelectorAll('.complete-task').forEach(button => {
+        button.addEventListener('click', function() {
+            const taskId = this.dataset.taskId;
+            const taskCard = this.closest('.task-card');
+            
+            fetch(`/complete/task/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Instead of removing, mark as complete and handle visibility
+                    taskCard.classList.add('task-completed');
+                    // Only hide if we're not showing completed tasks
+                    if (!window.location.href.includes('show_completed')) {
+                        taskCard.style.transition = 'all 0.3s ease';
+                        taskCard.style.opacity = '0';
+                        taskCard.style.transform = 'translateX(20px)';
+                        setTimeout(() => {
+                            taskCard.style.display = 'none';
+                        }, 300);
+                    }
+                } else {
+                    throw new Error('Failed to complete task');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to complete task');
+            });
+        });
+    });
+
+    // Add this for the toggle button
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const showCompleted = urlParams.has('show_completed');
+        
+        // Initialize completed tasks visibility
+        const completedTasks = document.querySelectorAll('.task-completed');
+        completedTasks.forEach(task => {
+            task.style.display = showCompleted ? 'flex' : 'none';
+            task.style.opacity = showCompleted ? '1' : '0';
+        });
+    });
+
+    // Add this new toggle functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.querySelector('.toggle-completed-btn');
+        const toggleIcon = toggleBtn.querySelector('i');
+        const toggleText = toggleBtn.querySelector('.toggle-text');
+        let isShowingCompleted = false;
+
+        function toggleCompletedTasks() {
+            const completedTasks = document.querySelectorAll('.task-completed');
+            isShowingCompleted = !isShowingCompleted;
+
+            completedTasks.forEach(task => {
+                task.style.display = isShowingCompleted ? 'flex' : 'none';
+                if (isShowingCompleted) {
+                    task.style.opacity = '1';
+                    task.style.transform = 'translateX(0)';
+                } else {
+                    task.style.opacity = '0';
+                    task.style.transform = 'translateX(20px)';
+                }
+            });
+
+            // Update button appearance
+            toggleIcon.className = isShowingCompleted ? 'fas fa-eye-slash' : 'fas fa-eye';
+            toggleText.textContent = isShowingCompleted ? 'Hide Completed Tasks' : 'Show Completed Tasks';
+            toggleBtn.classList.toggle('active');
+        }
+
+        toggleBtn.addEventListener('click', toggleCompletedTasks);
+
+        // Initialize completed tasks as hidden
+        document.querySelectorAll('.task-completed').forEach(task => {
+            task.style.display = 'none';
+        });
+    });
+
+    document.querySelectorAll('.toggle-complete-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const taskId = this.dataset.taskId;
+            const taskCard = this.closest('.task-card');
+            const icon = this.querySelector('i');
+            
+            fetch(`/toggle/task/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Toggle button and task card appearance
+                    this.classList.toggle('active');
+                    this.classList.toggle('btn-outline-success');
+                    this.classList.toggle('btn-success');
+                    icon.classList.toggle('fa-circle');
+                    icon.classList.toggle('fa-check-circle');
+                    taskCard.classList.toggle('task-completed');
+                    
+                    // Handle visibility based on current filter
+                    if (!window.location.href.includes('show_completed')) {
+                        if (taskCard.classList.contains('task-completed')) {
+                            taskCard.style.transition = 'all 0.3s ease';
+                            taskCard.style.opacity = '0';
+                            taskCard.style.transform = 'translateX(20px)';
+                            setTimeout(() => {
+                                taskCard.style.display = 'none';
+                            }, 300);
+                        }
+                    }
+                } else {
+                    throw new Error('Failed to toggle task');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to toggle task');
+            });
+        });
+    });
+    </script>
 </body>
 </html>
