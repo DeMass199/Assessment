@@ -53,7 +53,9 @@ def init_db():
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 username TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL
+                password TEXT NOT NULL,
+                theme TEXT DEFAULT 'light',
+                notification_preference TEXT DEFAULT 'email'
             )
         """)
         
@@ -94,6 +96,16 @@ def migrate_db():
             conn.commit()
             logger.info("Added category column to todos table")
         
+        # Check if theme and notification_preference columns exist
+        cursor.execute("PRAGMA table_info(users)")
+        columns = [column[1] for column in cursor.fetchall()]
+        
+        if 'theme' not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN theme TEXT DEFAULT 'light'")
+        if 'notification_preference' not in columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN notification_preference TEXT DEFAULT 'email'")
+            
+        conn.commit()
         conn.close()
         return True
     except sqlite3.Error as e:
@@ -326,6 +338,38 @@ def calendar_view():
                          next_month=next_month.month,
                          next_year=next_month.year,
                          active_page='calendar')
+
+
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    if 'user_id' not in session:
+        flash("Please login first!", "error")
+        return redirect(url_for("login"))
+    
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT theme, notification_preference, username FROM users WHERE id = ?", 
+                      (session['user_id'],))
+        user_settings = cursor.fetchone()
+        conn.close()
+        
+        if not user_settings:
+            flash("Error loading settings", "error")
+            return redirect(url_for("dashboard"))
+            
+        return render_template("settings.html", 
+                             settings={
+                                 'theme': user_settings[0],
+                                 'notification_preference': user_settings[1],
+                                 'username': user_settings[2]
+                             },
+                             active_page='settings')
+                             
+    except sqlite3.Error as e:
+        logger.error(f"Database error: {e}")
+        flash("Error loading settings", "error")
+        return redirect(url_for("dashboard"))
 
 
 if __name__ == "__main__":

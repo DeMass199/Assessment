@@ -1,0 +1,8 @@
+// ...existing code...
+{% if session.user_id %}
+    <div class="user-controls">
+        <a href="{{ url_for('settings') }}" class="btn btn-primary">Settings</a>
+        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+    </div>
+{% endif %}
+// ...existing code...
