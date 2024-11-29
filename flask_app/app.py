@@ -205,6 +205,19 @@ def signup():
     return render_template("signup.html")
 
 
+def colour(days_left):
+    """Determines the color based on days left until due date."""
+    if days_left < 0:
+        return "red"  # Overdue
+    elif days_left == 0:
+        return "yellow"  # Due today
+    elif days_left == 1:
+        return "yellow"  # Due tomorrow
+    elif days_left <= 7:
+        return "yellow"  # Due soon
+    else:
+        return "on-time"  # On time
+
 @app.route("/dashboard", methods=["GET", "POST"])
 def dashboard():
     if 'user_id' not in session:
@@ -251,22 +264,28 @@ def dashboard():
     todo_list = []
     for todo in todos:
         due_date = datetime.fromisoformat(todo[2])
-        time_left = due_date - datetime.now()
+        time_left = due_date.date() - date.today()
+        days_left = time_left.days
         
-        if time_left.total_seconds() < 0:
-            color = "red"  # Overdue
-        elif time_left <= timedelta(days=7):
-            color = "yellow"  # Due soon
+        color = colour(days_left)
+        
+        if days_left < 0:
+            due_text = f"{abs(days_left)} days overdue"
+        elif days_left == 0:
+            due_text = "Due today"
+        elif days_left == 1:
+            due_text = "Due tomorrow"
         else:
-            color = "on-time"
+            due_text = f"{days_left} days left"
             
         todo_list.append({
             "id": todo[0],
             "task": todo[1],
             "due_date": due_date.strftime("%Y-%m-%d"),
             "category": todo[3],
-            "notes": todo[4],  # Add notes to the todo item
-            "color": color
+            "notes": todo[4],
+            "color": color,
+            "due_text": due_text
         })
         
     return render_template("dashboard.html", todo_list=todo_list)
@@ -327,12 +346,14 @@ def calendar_view():
         task_date = datetime.strptime(task[1], "%Y-%m-%d").date()
         if task_date not in task_dict:
             task_dict[task_date] = []
+        days_left = (task_date - date.today()).days
+        task_color = colour(days_left)
         task_dict[task_date].append({
             "task": task[0],
             "due_date": task[1],
             "category": task[2],
-            "notes": task[3],  # Add notes to the task dictionary
-            "color": "red" if task_date < date.today() else "yellow" if task_date <= date.today() + timedelta(days=7) else "on-time"
+            "notes": task[3],
+            "color": task_color
         })
 
     # Build calendar data

@@ -59,6 +59,7 @@
                                          onclick="showTaskDetails('{{ task.task|e }}', '{{ task.due_date }}', '{{ task.category }}', '{{ task.notes|e }}')"
                                          style="cursor: pointer;">
                                         {{ task.task }}
+                                        <span class="due-text">{{ task.due_text }}</span>
                                         {% if task.notes %}
                                             <i class="fas fa-sticky-note" style="font-size: 0.8em; margin-left: 4px;"></i>
                                         {% endif %}
@@ -159,6 +160,8 @@
         align-items: center;
         justify-content: space-between;
         padding: 2px 6px;
+        border-radius: 4px;
+        margin-bottom: 2px;
     }
 
     .calendar-task:hover {
@@ -186,6 +189,27 @@
         color: #6c757d;
         white-space: pre-wrap;
         line-height: 1.4;
+    }
+
+    .calendar-task.red {
+        background-color: #ffe3e3;
+        color: #dc3545;
+    }
+
+    .calendar-task.yellow {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+
+    .calendar-task.on-time {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .due-text {
+        font-size: 0.75em;
+        margin-left: 8px;
+        font-weight: bold;
     }
     </style>
 </body>
