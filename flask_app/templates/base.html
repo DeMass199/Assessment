@@ -1,8 +1,60 @@
-// ...existing code...
-{% if session.user_id %}
-    <div class="user-controls">
-        <a href="{{ url_for('settings') }}" class="btn btn-primary">Settings</a>
-        <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
-    </div>
-{% endif %}
-// ...existing code...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TaskMaster Pro{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        {% if 'user_id' in session %}
+            <a href="{{ url_for('dashboard') }}" class="{% if active_page == 'dashboard' %}active{% endif %}">Dashboard</a>
+            <a href="{{ url_for('calendar_view') }}" class="{% if active_page == 'calendar' %}active{% endif %}">Calendar</a>
+            <a href="{{ url_for('settings') }}" class="{% if active_page == 'settings' %}active{% endif %}">Settings</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('signup') }}">Sign Up</a>
+        {% endif %}
+    </nav>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .navbar {
+            background-color: #333;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        
+        .navbar a:hover, .navbar a.active {
+            background-color: #555;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+    </style>
+</body>
+</html>

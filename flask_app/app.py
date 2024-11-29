@@ -346,11 +346,87 @@ def settings():
         flash("Please login first!", "error")
         return redirect(url_for("login"))
     
+    if request.method == "POST":
+        theme = request.form.get("theme", "light")
+        notification_preference = request.form.get("notification_preference", "email")
+        new_username = request.form.get("new_username")
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cursor = conn.cursor()
+            
+            # First verify current password if attempting password change
+            if current_password and new_password:
+                cursor.execute("SELECT password FROM users WHERE id = ?", (session['user_id'],))
+                stored_password = cursor.fetchone()[0]
+                if not check_password_hash(stored_password, current_password):
+                    flash("Current password is incorrect!", "error")
+                    return redirect(url_for("settings"))
+                
+                # Update password
+                hashed_password = generate_password_hash(new_password)
+                cursor.execute("""
+                    UPDATE users 
+                    SET password = ?
+                    WHERE id = ?
+                """, (hashed_password, session['user_id']))
+                flash("Password updated successfully!", "success")
+            
+            # Update username if provided
+            if new_username and new_username != session['username']:
+                cursor.execute("UPDATE users SET username = ? WHERE id = ?", 
+                             (new_username, session['user_id']))
+                session['username'] = new_username
+                flash("Username updated successfully!", "success")
+            
+            # Update theme and notifications
+            cursor.execute("""
+                UPDATE users 
+                SET theme = ?, notification_preference = ?
+                WHERE id = ?
+            """, (theme, notification_preference, session['user_id']))
+            
+            conn.commit()
+            
+            # Fetch updated settings
+            cursor.execute("""
+                SELECT theme, notification_preference, username 
+                FROM users 
+                WHERE id = ?
+            """, (session['user_id'],))
+            user_settings = cursor.fetchone()
+            conn.close()
+            
+            if not user_settings:
+                flash("Error loading settings", "error")
+                return redirect(url_for("dashboard"))
+                
+            settings_dict = {
+                'theme': user_settings[0],
+                'notification_preference': user_settings[1],
+                'username': user_settings[2]
+            }
+            
+            return render_template("settings.html", 
+                                 settings=settings_dict,
+                                 active_page='settings')
+                                 
+        except sqlite3.Error as e:
+            logger.error(f"Database error: {e}")
+            flash("Error updating settings", "error")
+            return redirect(url_for("settings"))
+    
+    # GET request - display current settings
     try:
         conn = sqlite3.connect(DB_PATH)
         cursor = conn.cursor()
-        cursor.execute("SELECT theme, notification_preference, username FROM users WHERE id = ?", 
-                      (session['user_id'],))
+        cursor.execute("""
+            SELECT theme, notification_preference, username 
+            FROM users 
+            WHERE id = ?
+        """, (session['user_id'],))
         user_settings = cursor.fetchone()
         conn.close()
         
@@ -358,12 +434,14 @@ def settings():
             flash("Error loading settings", "error")
             return redirect(url_for("dashboard"))
             
+        settings_dict = {
+            'theme': user_settings[0],
+            'notification_preference': user_settings[1],
+            'username': user_settings[2]
+        }
+        
         return render_template("settings.html", 
-                             settings={
-                                 'theme': user_settings[0],
-                                 'notification_preference': user_settings[1],
-                                 'username': user_settings[2]
-                             },
+                             settings=settings_dict,
                              active_page='settings')
                              
     except sqlite3.Error as e:

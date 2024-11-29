@@ -1,90 +1,67 @@
 {% extends 'base.html' %}
 
-{% block title %}Settings - TaskMaster Pro{% endblock %}
+{% block title %}Settings{% endblock %}
 
 {% block content %}
 <div class="settings-wrapper">
     <div class="settings-container">
         <div class="settings-header">
             <h2><i class="fas fa-cog"></i> Account Settings</h2>
-            <p class="settings-subtitle">Manage your account preferences and customize your experience</p>
+            <p class="settings-subtitle">Manage your account preferences</p>
         </div>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} fade-out">
-                        {{ message }}
-                    </div>
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
                 {% endfor %}
             {% endif %}
         {% endwith %}
 
-        <form method="POST" class="settings-form">
-            <!-- Account Settings Section -->
+        <form method="POST" action="{{ url_for('settings') }}" class="settings-form">
             <div class="settings-section">
-                <h3><i class="fas fa-user-circle"></i> Account Settings</h3>
+                <h3>Account Information</h3>
                 <div class="form-group">
-                    <label for="new_username">Change Username</label>
-                    <input type="text" id="new_username" name="new_username" class="form-control" 
-                           value="{{ settings.username }}" placeholder="Enter new username">
+                    <label for="new_username">Username</label>
+                    <input type="text" id="new_username" name="new_username" 
+                           value="{{ settings.username }}" class="form-control">
                 </div>
+
                 <div class="form-group">
                     <label for="current_password">Current Password</label>
                     <input type="password" id="current_password" name="current_password" 
-                           class="form-control" placeholder="Enter current password">
+                           class="form-control">
                 </div>
+
                 <div class="form-group">
                     <label for="new_password">New Password</label>
                     <input type="password" id="new_password" name="new_password" 
-                           class="form-control" placeholder="Enter new password">
+                           class="form-control">
                 </div>
             </div>
 
             <div class="settings-section">
-                <h3>Display Settings</h3>
+                <h3>Preferences</h3>
                 <div class="form-group">
-                    <label for="theme">
-                        <i class="fas fa-palette"></i> Theme
-                    </label>
+                    <label for="theme">Theme</label>
                     <select name="theme" id="theme" class="form-control">
-                        <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>
-                            <i class="fas fa-sun"></i> Light Mode
-                        </option>
-                        <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>
-                            <i class="fas fa-moon"></i> Dark Mode
-                        </option>
+                        <option value="light" {% if settings.theme == 'light' %}selected{% endif %}>Light</option>
+                        <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Dark</option>
                     </select>
                 </div>
-            </div>
 
-            <div class="settings-section">
-                <h3>Notification Settings</h3>
                 <div class="form-group">
-                    <label for="notification_preference">
-                        <i class="fas fa-bell"></i> Notification Preference
-                    </label>
+                    <label for="notification_preference">Notifications</label>
                     <select name="notification_preference" id="notification_preference" class="form-control">
-                        <option value="email" {% if settings.notification_preference == 'email' %}selected{% endif %}>
-                            <i class="fas fa-envelope"></i> Email Notifications
-                        </option>
-                        <option value="push" {% if settings.notification_preference == 'push' %}selected{% endif %}>
-                            <i class="fas fa-mobile-alt"></i> Push Notifications
-                        </option>
-                        <option value="none" {% if settings.notification_preference == 'none' %}selected{% endif %}>
-                            <i class="fas fa-bell-slash"></i> No Notifications
-                        </option>
+                        <option value="email" {% if settings.notification_preference == 'email' %}selected{% endif %}>Email</option>
+                        <option value="push" {% if settings.notification_preference == 'push' %}selected{% endif %}>Push</option>
+                        <option value="none" {% if settings.notification_preference == 'none' %}selected{% endif %}>None</option>
                     </select>
                 </div>
             </div>
 
             <div class="settings-actions">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save"></i> Save Changes
-                </button>
-                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
-                    <i class="fas fa-times"></i> Cancel
-                </a>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
             </div>
         </form>
     </div>
@@ -92,138 +69,65 @@
 
 <style>
     .settings-wrapper {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1rem;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
     }
 
     .settings-container {
         background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        padding: 2rem;
-    }
-
-    .settings-header {
-        margin-bottom: 2rem;
-        border-bottom: 1px solid #eee;
-        padding-bottom: 1rem;
-    }
-
-    .settings-header h2 {
-        color: #333;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .settings-subtitle {
-        color: #666;
-        font-size: 0.9rem;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .settings-section {
-        margin-bottom: 2rem;
-    }
-
-    .settings-section h3 {
-        color: #444;
-        font-size: 1.1rem;
-        margin-bottom: 1rem;
+        margin-bottom: 30px;
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 15px;
     }
 
     .form-group label {
         display: block;
-        margin-bottom: 0.5rem;
-        color: #555;
-        font-weight: 500;
+        margin-bottom: 5px;
+        font-weight: bold;
     }
 
     .form-control {
         width: 100%;
-        padding: 0.75rem;
+        padding: 8px;
         border: 1px solid #ddd;
-        border-radius: 5px;
-        font-size: 1rem;
-        transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-        border-color: #007bff;
-        outline: none;
-        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
-    }
-
-    .settings-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 1rem;
-        border-top: 1px solid #eee;
+        border-radius: 4px;
     }
 
     .btn {
-        padding: 0.75rem 1.5rem;
+        padding: 10px 20px;
         border: none;
-        border-radius: 5px;
-        font-size: 1rem;
+        border-radius: 4px;
         cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: all 0.2s;
     }
 
     .btn-primary {
-        background: #007bff;
+        background-color: #007bff;
         color: white;
-    }
-
-    .btn-primary:hover {
-        background: #0056b3;
-    }
-
-    .btn-secondary {
-        background: #6c757d;
-        color: white;
-        text-decoration: none;
-    }
-
-    .btn-secondary:hover {
-        background: #5a6268;
     }
 
     .alert {
-        padding: 1rem;
-        border-radius: 5px;
-        margin-bottom: 1rem;
+        padding: 10px;
+        margin-bottom: 15px;
+        border-radius: 4px;
     }
 
     .alert-success {
-        background: #d4edda;
+        background-color: #d4edda;
         color: #155724;
-        border: 1px solid #c3e6cb;
     }
 
     .alert-error {
-        background: #f8d7da;
+        background-color: #f8d7da;
         color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    .fade-out {
-        animation: fadeOut 5s forwards;
-    }
-
-    @keyframes fadeOut {
-        0% { opacity: 1; }
-        70% { opacity: 1; }
-        100% { opacity: 0; }
     }
 </style>
 {% endblock %}
