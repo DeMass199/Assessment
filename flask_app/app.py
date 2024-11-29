@@ -308,18 +308,20 @@ def calendar_view():
     cal = calendar.monthcalendar(year, month)
     month_name = calendar.month_name[month]
 
-    # Get tasks for the current month
+    # Get tasks for the current month - update query to include notes
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT task, due_date FROM todos 
+        SELECT task, due_date, category, notes 
+        FROM todos 
         WHERE user_id = ? 
         AND strftime('%Y-%m', due_date) = strftime('%Y-%m', ?)
+        ORDER BY date(due_date) ASC
     """, (session['user_id'], f"{year}-{month:02d}-01"))
     tasks = cursor.fetchall()
     conn.close()
 
-    # Organize tasks by date
+    # Organize tasks by date - update task dictionary to include notes
     task_dict = {}
     for task in tasks:
         task_date = datetime.strptime(task[1], "%Y-%m-%d").date()
@@ -327,6 +329,9 @@ def calendar_view():
             task_dict[task_date] = []
         task_dict[task_date].append({
             "task": task[0],
+            "due_date": task[1],
+            "category": task[2],
+            "notes": task[3],  # Add notes to the task dictionary
             "color": "red" if task_date < date.today() else "yellow" if task_date <= date.today() + timedelta(days=7) else "on-time"
         })
 

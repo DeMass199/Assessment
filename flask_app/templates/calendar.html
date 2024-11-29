@@ -55,8 +55,13 @@
                                 <div class="day-number">{{ day.day }}</div>
                                 {% if day.tasks %}
                                     {% for task in day.tasks %}
-                                    <div class="calendar-task status-{{ task.color }}">
+                                    <div class="calendar-task {{ task.color }}" 
+                                         onclick="showTaskDetails('{{ task.task|e }}', '{{ task.due_date }}', '{{ task.category }}', '{{ task.notes|e }}')"
+                                         style="cursor: pointer;">
                                         {{ task.task }}
+                                        {% if task.notes %}
+                                            <i class="fas fa-sticky-note" style="font-size: 0.8em; margin-left: 4px;"></i>
+                                        {% endif %}
                                     </div>
                                     {% endfor %}
                                 {% endif %}
@@ -67,5 +72,121 @@
             </div>
         </main>
     </div>
+
+    <!-- Add this modal HTML at the end of your calendar template, before closing body tag -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTaskModal()">&times;</span>
+            <div id="taskDetails">
+                <!-- Task details will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add this JavaScript at the end of your template -->
+    <script>
+    function showTaskDetails(task, dueDate, category, notes) {
+        const modal = document.getElementById('taskModal');
+        const details = document.getElementById('taskDetails');
+        
+        details.innerHTML = `
+            <h3>${task}</h3>
+            <p><i class="far fa-calendar-alt"></i> Due: ${dueDate}</p>
+            <p><i class="fas fa-tag"></i> Category: ${category}</p>
+            ${notes ? `
+            <div class="task-notes">
+                <h4><i class="fas fa-sticky-note"></i> Notes</h4>
+                <p>${notes}</p>
+            </div>` : ''}
+        `;
+        
+        modal.style.display = "block";
+    }
+
+    function closeTaskModal() {
+        document.getElementById('taskModal').style.display = "none";
+    }
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+        const modal = document.getElementById('taskModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+    </script>
+
+    <style>
+    /* Add these styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        max-width: 500px;
+        border-radius: 8px;
+        position: relative;
+    }
+
+    .close {
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .close:hover {
+        color: black;
+    }
+
+    .calendar-task {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 2px 6px;
+    }
+
+    .calendar-task:hover {
+        opacity: 0.8;
+    }
+
+    .task-notes {
+        margin-top: 1rem;
+        padding: 1rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        border-left: 3px solid #007bff;
+    }
+
+    .task-notes h4 {
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .task-notes p {
+        margin: 0;
+        color: #6c757d;
+        white-space: pre-wrap;
+        line-height: 1.4;
+    }
+    </style>
 </body>
 </html>
