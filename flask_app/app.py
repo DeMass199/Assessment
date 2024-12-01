@@ -610,6 +610,57 @@ def settings():
         flash("Error loading settings", "error")
         return redirect(url_for("dashboard"))
 
+def reset_database():
+    """Reset the database by dropping and recreating tables"""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        # Drop existing tables
+        cursor.execute("DROP TABLE IF EXISTS todos")
+        cursor.execute("DROP TABLE IF EXISTS users")
+        
+        # Recreate tables
+        cursor.execute("""
+            CREATE TABLE users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                theme TEXT DEFAULT 'light',
+                notification_preference TEXT DEFAULT 'email'
+            )
+        """)
+        
+        cursor.execute("""
+            CREATE TABLE todos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                task TEXT NOT NULL,
+                due_date TEXT NOT NULL,
+                done BOOLEAN NOT NULL DEFAULT 0,
+                category TEXT DEFAULT 'General',
+                notes TEXT DEFAULT '',
+                importance TEXT DEFAULT 'medium',
+                progress INTEGER DEFAULT 0,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+        """)
+        
+        conn.commit()
+        conn.close()
+        return True
+    except sqlite3.Error as e:
+        logger.error(f"Database reset error: {e}")
+        return False
+
+@app.route("/reset", methods=["GET"])
+def reset():
+    if reset_database():
+        session.clear()  # Clear current session
+        flash("Database has been reset. Please sign up for a new account.", "success")
+    else:
+        flash("Failed to reset database.", "error")
+    return redirect(url_for("login"))
 
 if __name__ == "__main__":
     app.run(debug=True)
