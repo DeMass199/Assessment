@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Edit Task</h2>
+    <form method="POST" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label for="todo_task" class="form-label">Task</label>
+            <input type="text" class="form-control" id="todo_task" name="todo_task" value="{{ task.task }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="due_date" class="form-label">Due Date</label>
+            <input type="date" class="form-control" id="due_date" name="due_date" value="{{ task.due_date }}" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="category" class="form-label">Category</label>
+            <select class="form-select" id="category" name="category" required>
+                <option value="General" {% if task.category == 'General' %}selected{% endif %}>General</option>
+                <option value="Work" {% if task.category == 'Work' %}selected{% endif %}>Work</option>
+                <option value="Personal" {% if task.category == 'Personal' %}selected{% endif %}>Personal</option>
+                <option value="School" {% if task.category == 'School' %}selected{% endif %}>School</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="importance" class="form-label">Importance</label>
+            <select class="form-select" id="importance" name="importance" required>
+                <option value="low" {% if task.importance == 'low' %}selected{% endif %}>Low</option>
+                <option value="medium" {% if task.importance == 'medium' %}selected{% endif %}>Medium</option>
+                <option value="high" {% if task.importance == 'high' %}selected{% endif %}>High</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3">{{ task.notes }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="progress" class="form-label">Progress</label>
+            <input type="range" class="form-range" id="progress" name="progress" min="0" max="100" value="{{ task.progress }}">
+            <div class="text-center" id="progressValue">{{ task.progress }}%</div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+
+<script>
+    // Update progress value display
+    const progressInput = document.getElementById('progress');
+    const progressValue = document.getElementById('progressValue');
+    progressInput.addEventListener('input', function() {
+        progressValue.textContent = this.value + '%';
+    });
+</script>
+{% endblock %}

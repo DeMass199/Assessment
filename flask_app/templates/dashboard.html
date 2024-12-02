@@ -321,6 +321,10 @@
                             </div>
                         </div>
                         <div class="task-actions">
+                            <!-- Add this edit button -->
+                            <a href="{{ url_for('edit_task', task_id=todo.id) }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
                             <button class="btn btn-sm toggle-complete-btn {% if todo.done %}btn-success active{% else %}btn-outline-success{% endif %}" 
                                     data-task-id="{{ todo.id }}">
                                 <i class="fas {% if todo.done %}fa-check-circle{% else %}fa-circle{% endif %}"></i>

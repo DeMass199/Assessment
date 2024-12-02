@@ -662,5 +662,65 @@ def reset():
         flash("Failed to reset database.", "error")
     return redirect(url_for("login"))
 
+@app.route("/edit_task/<int:task_id>", methods=["GET", "POST"])
+def edit_task(task_id):
+    if 'user_id' not in session:
+        flash("Please login first!", "error")
+        return redirect(url_for("login"))
+        
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    if request.method == "POST":
+        task = request.form.get("todo_task")
+        due_date_str = request.form.get("due_date")
+        category = request.form.get("category")
+        notes = request.form.get("notes")
+        importance = request.form.get("importance")
+        progress = int(request.form.get("progress", 0))
+        
+        if task and due_date_str and category:
+            try:
+                # Parse the date
+                due_date = datetime.strptime(due_date_str, "%Y-%m-%d")
+                due_date_iso = due_date.date().isoformat()
+                
+                cursor.execute("""
+                    UPDATE todos 
+                    SET task = ?, due_date = ?, category = ?, notes = ?, importance = ?, progress = ?
+                    WHERE id = ? AND user_id = ?
+                """, (task, due_date_iso, category, notes, importance, progress, task_id, session['user_id']))
+                conn.commit()
+                flash("Task updated successfully!", "success")
+                return redirect(url_for("dashboard"))
+            except ValueError:
+                flash("Invalid date format.", "error")
+    
+    # Get the current task data
+    cursor.execute("""
+        SELECT task, due_date, category, notes, importance, progress 
+        FROM todos 
+        WHERE id = ? AND user_id = ?
+    """, (task_id, session['user_id']))
+    
+    task = cursor.fetchone()
+    conn.close()
+    
+    if task is None:
+        flash("Task not found!", "error")
+        return redirect(url_for("dashboard"))
+        
+    task_data = {
+        "id": task_id,
+        "task": task[0],
+        "due_date": task[1],
+        "category": task[2],
+        "notes": task[3],
+        "importance": task[4],
+        "progress": task[5]
+    }
+    
+    return render_template("edit_task.html", task=task_data)
+
 if __name__ == "__main__":
     app.run(debug=True)
