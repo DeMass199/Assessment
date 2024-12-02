@@ -1,60 +1,190 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>Edit Task</h2>
-    <form method="POST" class="needs-validation" novalidate>
-        <div class="mb-3">
-            <label for="todo_task" class="form-label">Task</label>
-            <input type="text" class="form-control" id="todo_task" name="todo_task" value="{{ task.task }}" required>
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">
+                <i class="fas fa-edit me-2"></i>Edit Task
+            </h2>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-sm">
+                <i class="fas fa-times"></i>
+            </a>
         </div>
+        <div class="card-body">
+            <form method="POST" class="needs-validation" novalidate>
+                <div class="row">
+                    <!-- Task Title -->
+                    <div class="col-md-8 mb-3">
+                        <label for="todo_task" class="form-label">
+                            <i class="fas fa-tasks me-1"></i>Task Title
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               id="todo_task" 
+                               name="todo_task" 
+                               value="{{ task.task }}" 
+                               required>
+                    </div>
 
-        <div class="mb-3">
-            <label for="due_date" class="form-label">Due Date</label>
-            <input type="date" class="form-control" id="due_date" name="due_date" value="{{ task.due_date }}" required>
+                    <!-- Due Date -->
+                    <div class="col-md-4 mb-3">
+                        <label for="due_date" class="form-label">
+                            <i class="far fa-calendar-alt me-1"></i>Due Date
+                        </label>
+                        <input type="date" 
+                               class="form-control" 
+                               id="due_date" 
+                               name="due_date" 
+                               value="{{ task.due_date }}" 
+                               required>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Category -->
+                    <div class="col-md-6 mb-3">
+                        <label for="category" class="form-label">
+                            <i class="fas fa-tag me-1"></i>Category
+                        </label>
+                        <select class="form-select" id="category" name="category" required>
+                            <option value="Work" {% if task.category == 'Work' %}selected{% endif %}>Work</option>
+                            <option value="Meeting" {% if task.category == 'Meeting' %}selected{% endif %}>Meeting</option>
+                            <option value="Tutoring" {% if task.category == 'Tutoring' %}selected{% endif %}>Tutoring</option>
+                            <option value="Assessment" {% if task.category == 'Assessment' %}selected{% endif %}>Assessment</option>
+                            <option value="Main project" {% if task.category == 'Main project' %}selected{% endif %}>Main project</option>
+                        </select>
+                    </div>
+
+                    <!-- Importance -->
+                    <div class="col-md-6 mb-3">
+                        <label for="importance" class="form-label">
+                            <i class="fas fa-exclamation-circle me-1"></i>Priority Level
+                        </label>
+                        <select class="form-select" id="importance" name="importance" required>
+                            <option value="low" {% if task.importance == 'low' %}selected{% endif %}>
+                                <i class="fas fa-arrow-down"></i> Low Priority
+                            </option>
+                            <option value="medium" {% if task.importance == 'medium' %}selected{% endif %}>
+                                <i class="fas fa-minus"></i> Medium Priority
+                            </option>
+                            <option value="high" {% if task.importance == 'high' %}selected{% endif %}>
+                                <i class="fas fa-arrow-up"></i> High Priority
+                            </option>
+                            <option value="urgent" {% if task.importance == 'urgent' %}selected{% endif %}>
+                                <i class="fas fa-exclamation"></i> Urgent
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Notes -->
+                <div class="mb-3">
+                    <label for="notes" class="form-label">
+                        <i class="fas fa-sticky-note me-1"></i>Notes
+                    </label>
+                    <textarea class="form-control" 
+                              id="notes" 
+                              name="notes" 
+                              rows="4" 
+                              placeholder="Add any additional details about the task...">{{ task.notes }}</textarea>
+                </div>
+
+                <!-- Progress -->
+                <div class="mb-4">
+                    <label for="progress" class="form-label d-flex justify-content-between">
+                        <span><i class="fas fa-chart-line me-1"></i>Progress</span>
+                        <span class="badge bg-primary" id="progressValue">{{ task.progress }}%</span>
+                    </label>
+                    <input type="range" 
+                           class="form-range custom-range" 
+                           id="progress" 
+                           name="progress" 
+                           min="0" 
+                           max="100" 
+                           value="{{ task.progress }}">
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save Changes
+                    </button>
+                </div>
+            </form>
         </div>
-
-        <div class="mb-3">
-            <label for="category" class="form-label">Category</label>
-            <select class="form-select" id="category" name="category" required>
-                <option value="General" {% if task.category == 'General' %}selected{% endif %}>General</option>
-                <option value="Work" {% if task.category == 'Work' %}selected{% endif %}>Work</option>
-                <option value="Personal" {% if task.category == 'Personal' %}selected{% endif %}>Personal</option>
-                <option value="School" {% if task.category == 'School' %}selected{% endif %}>School</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="importance" class="form-label">Importance</label>
-            <select class="form-select" id="importance" name="importance" required>
-                <option value="low" {% if task.importance == 'low' %}selected{% endif %}>Low</option>
-                <option value="medium" {% if task.importance == 'medium' %}selected{% endif %}>Medium</option>
-                <option value="high" {% if task.importance == 'high' %}selected{% endif %}>High</option>
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="notes" class="form-label">Notes</label>
-            <textarea class="form-control" id="notes" name="notes" rows="3">{{ task.notes }}</textarea>
-        </div>
-
-        <div class="mb-3">
-            <label for="progress" class="form-label">Progress</label>
-            <input type="range" class="form-range" id="progress" name="progress" min="0" max="100" value="{{ task.progress }}">
-            <div class="text-center" id="progressValue">{{ task.progress }}%</div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Save Changes</button>
-        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
-    </form>
+    </div>
 </div>
 
+<!-- Add this custom CSS -->
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .custom-range {
+        height: 6px;
+        border-radius: 3px;
+    }
+    
+    .custom-range::-webkit-slider-thumb {
+        background: #007bff;
+    }
+    
+    .form-control, .form-select {
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        padding: 0.75rem;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+</style>
+
 <script>
-    // Update progress value display
+document.addEventListener('DOMContentLoaded', function() {
     const progressInput = document.getElementById('progress');
     const progressValue = document.getElementById('progressValue');
+    
     progressInput.addEventListener('input', function() {
         progressValue.textContent = this.value + '%';
     });
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+    });
+});
 </script>
 {% endblock %}
