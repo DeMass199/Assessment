@@ -1,3 +1,4 @@
+![freepik__candid-image-photography-natural-textures-highly-r__81168](https://github.com/user-attachments/assets/7cabdb5d-943d-4ecb-83ce-350179a7ce4d)
 
 # Task Master Pro
 
